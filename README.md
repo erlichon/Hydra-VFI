@@ -15,15 +15,17 @@ Barak Aharoni & Itay Erlich
    - [Model](#model)
    - [Fine Tuning the Model for Hydra Regeneration](#fine-tuning-the-model-for-hydra-regeneration)
    - [Dataset](#dataset)
-   - [Preprocessing](#preprocessing)
-3. [Training](#training)
-   - [Infrastructure](#infrastructure)
-   - [Training the Autoencoder](#training-the-autoencoder)
-   - [Training the Consecutive Brownian Bridge Diffusion Module](#training-the-consecutive-brownian-bridge-diffusion-module)
-4. [Results](#results)
-5. [Command-Line Usage](#command-line-usage)
-6. [Ethics Statement](#ethics-statement)
-7. [Links](#links)
+        - [Dataset Creation](#dataset-creation)
+3. [Model Usage](#model-usage)
+   - [Setup & Infrastructure](#setup--infrastructure)
+   - [Training LBBDM (Consecutive Brownian Bridge Diffusion Module)](#training-lbbdm-consecutive-brownian-bridge-diffusion-module)
+   - [Evaluating LBBDM](#evaluating-lbbdm)
+   - [Training LDMVFI AutoEncoder](#training-ldmvfi-autoencoder)
+   - [Two Frame Interpolation](#two-frame-interpolation)
+   - [Entire Video Frame Interpolation](#entire-video-frame-interpolation)
+4. [Result Video - comparison between original frames and our Frame Interpolation](#result-video---comparison-between-original-frames-and-our-frame-interpolation)
+5. [Ethics Statement](#ethics-statement)
+6. [Links](#links)
 
 ## Introduction
 
@@ -90,6 +92,7 @@ We found it useful to use a small dataset to experiment and see reasonable resul
 Training was performed on a DGX A100 Server with 8 A100 GPUs, using CUDA and PyTorch for accelerated processing.
 running on the DGX Server is avaiable only in a container. To enable the model to run on the DGX server, we created a docker containing all of the dependencies 
 needed for both submodules (LDMVFI, ConsecutiveBrownianBridge). the docker is available here: [link](https://hub.docker.com/layers/itayerlich/dl_project_docker/3/images/sha256-77732e57ecb1090670e15a8f21ee456532f18d155b66ba1b5971d04ccd4fe0a2?context=repo). 
+
 However, if you want to run the model on another enviroment, you may use the following command to setup all of the neccessary requirements for the project:
 ```
 pip install -r ./requirements.txt 
@@ -128,7 +131,7 @@ python ./interpolate_whole_video.py --resume_model "/path/to/model/checkpoint" -
 To interpolate an entire video just remove --frame_start and --frame_end argument. [interpolate_whole_video.py](./ConsecutiveBrownianBridge/interpolate_whole_video.py) currently multiplies framerate by 8 without other frame rates multiply factors available as in [interpolate.py](./ConsecutiveBrownianBridge/interpolate.py)
 
 
-## Result Video - Comparison between original frames and our Frame Interpolation
+## Result Video - comparison between original frames and our Frame Interpolation
 ![Demo gif](./doc/Hydra_comparison_gif.gif)
 
 ## Ethics Statement

@@ -1,0 +1,6 @@
+[submodule "ConsecutiveBrownianBridge"]
+	path = ConsecutiveBrownianBridge
+	url = https://github.com/erlichon/ConsecutiveBrownianBridge.git
+[submodule "LDMVFI"]
+	path = LDMVFI
+	url = https://github.com/erlichon/LDMVFI.git

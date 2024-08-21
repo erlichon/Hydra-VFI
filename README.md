@@ -52,7 +52,7 @@ Video frame interpolation generates intermediate frames between consecutive fram
 
 We used the Frame Interpolation with Consecutive Brownian Bridge Diffusion model, which introduces a novel technique to improve video frame interpolation by reducing randomness. This approach is suitable for capturing the detailed changes in Hydra regeneration.
 
-![Model Architecture](./doc/overview.pdf)
+![Model Architecture](./doc/overview.jpg)
 
 ### Fine Tuning the Model for Hydra Regeneration
 

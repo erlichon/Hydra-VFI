@@ -21,14 +21,9 @@ Barak Aharoni & Itay Erlich
    - [Training the Autoencoder](#training-the-autoencoder)
    - [Training the Consecutive Brownian Bridge Diffusion Module](#training-the-consecutive-brownian-bridge-diffusion-module)
 4. [Results](#results)
-   - [Great Success](#great-success)
-   - [Place for Improvement](#place-for-improvement)
 5. [Command-Line Usage](#command-line-usage)
-6. [Future Work](#future-work)
-7. [Ethics Statement](#ethics-statement)
-8. [Links](#links)
-9. [Additional Model Information](#additional-model-information)
-10. [Citation](#citation)
+6. [Ethics Statement](#ethics-statement)
+7. [Links](#links)
 
 ## Introduction
 
@@ -79,54 +74,65 @@ To make use of the Hydra_triplets dataset defined in [bvi_vimeo.py](./LDMVFI/ldm
 where ```tri_{test, train, val}list.txt``` is a text file containing a triplets of consecutive frames.
 
 #### Dataset Creation
-To create the Dataset in
+To create the Dataset in a relative ratio of test/train/val triplets from each video given the hydra data directory structure above, run the following command:
+```
+python ./hydra_create_dataset.py db_dirpath
+```
+where ```db_dirpath``` is the path to the hydra videos db in your server. 
+if you want to create a small dataset from a hydra data directory in the above structure, run:
+```
+python ./hydra_create_dataset.py db_dirpath
+```
+We found it useful to use a small dataset to experiment and see reasonable results before running on the entire dataset.
 
+## Model Usage
+### Setup & Infrastructure
+Training was performed on a DGX A100 Server with 8 A100 GPUs, using CUDA and PyTorch for accelerated processing.
+running on the DGX Server is avaiable only in a container. To enable the model to run on the DGX server, we created a docker containing all of the dependencies 
+needed for both submodules (LDMVFI, ConsecutiveBrownianBridge). the docker is available here: [link](https://hub.docker.com/layers/itayerlich/dl_project_docker/3/images/sha256-77732e57ecb1090670e15a8f21ee456532f18d155b66ba1b5971d04ccd4fe0a2?context=repo). 
+However, if you want to run the model on another enviroment, you may use the following command to setup all of the neccessary requirements for the project:
+```
+pip install -r ./requirements.txt 
+```
 
-
-
-### Training the Autoencoder
-
-The autoencoder identified unique Hydra features. [Training Loss Graph]
-
-### Training the Consecutive Brownian Bridge Diffusion Module
-
-Following autoencoder training, the diffusion module was trained to generate intermediate frames. [Training Loss Graph]
-
-## Command-Line Usage
-
-### Training LBBDM
+### Training LBBDM (Consecutive Brownian Bridge Diffusion Module)
 
 To train the LBBDM model, use the following command (running from ConsecutiveBrownianBridge folder):
-```bash
+```
 nohup python ./main.py --config ./configs/Template-LBBDM-video-hydra.yaml --train --save_top --gpu_ids 0,1 -r ./results_LBBDM > LBBDM_train_output.log 2>&1 &
-Evaluating LBBDM
-For model evaluation:
+```
 
-```bash
-
+#### Evaluating LBBDM
+For model evaluation, use the following command:
+```
 python ./ConsecutiveBrownianBridge/main.py --config ./ConsecutiveBrownianBridge/configs/Template-LBBDM-video.yaml --gpu_ids 0 -r ./results_LBBDM --resume_model path/to/model.pth --sample_to_eval
 ```
 
 ### Training LDMVFI AutoEncoder
 To train the LDMVFI AutoEncoder, use the following command (running from LDMVFI folder):
-
-```bash
-
-nohup python main.py --base ./configs/autoencoder/vqflow-f32-small-hydra-dataset.yaml -r "/raid/home/itayerlich/DL_Project/LDMVFI/results_hydra_small_dataset/VQGAN/new_vimeo.ckpt" -t --gpus 0,1,2 > output_train_small_dataset.log 2>&1 &
 ```
-### Video Frame Interpolation
-To interpolate frames between two given frames using the trained model, use these commands:
+nohup python main.py --base ./configs/autoencoder/vqflow-f32-hydra.yaml -r "path/to/model/checkpoint" -t --gpus 0,1,2 > LDMVFI_train_output.log 2>&1 &
+```
+### Two Frame Interpolation
+To interpolate frames only between two given frames using the trained model, use the following command:
 
-```bash
-python ./ConsecutiveBrownianBridge/interpolate.py --resume_model "/path/to/model/checkpoint" --frame0 "/path/to/frame0" --frame1 "/path/to/frame1" -r "/path/to/output" --xN 8 --config ./ConsecutiveBrownianBridge/configs/Template-LBBDM-video.yaml --gpu_ids 0,1,2
+```
+python ./ConsecutiveBrownianBridge/interpolate.py --resume_model "/path/to/model/checkpoint" --frame0 "/path/to/frame0" --frame1 "/path/to/frame1" -r "/path/to/output" --xN <frame_rate_multiply_factor> --config ./ConsecutiveBrownianBridge/configs/Template-LBBDM-video.yaml --gpu_ids 0
 ```
 
-### Future Work
-Future directions include advancing biophysical analysis by tracking regenerative cellular changes and enhancing the model with additional context from more frames.
+### Entire Video Frame Interpolation
+To interpolate an entire Hydra video, or a portion of the video (say frames 400-500), use the following command:
+```
+python ./interpolate_whole_video.py --resume_model "/path/to/model/checkpoint" --folder path/to/hydra/video/folder --frame_start 400 --frame_end  500 -r "path/to/result/folder"  --config ./configs/Template-LBBDM-video-hydra.yaml --gpu_ids 0
+```
+To interpolate an entire video just remove --frame_start and --frame_end argument. [interpolate_whole_video.py](./ConsecutiveBrownianBridge/interpolate_whole_video.py) currently multiplies framerate by 8 without other frame rates multiply factors available as in [interpolate.py](./ConsecutiveBrownianBridge/interpolate.py)
 
-### Ethics Statement
+
+## Result Video - Comparison between original frames and our Frame Interpolation
+![Demo gif](./doc/Hydra_comparison_gif.gif)
+
+## Ethics Statement
 While the project has great potential, it is crucial to acknowledge that generated frames cannot replace real data. Users must be aware of this limitation to prevent misleading outcomes.
 
-### Links
+## Links
 Presentation Video: [link]
-GitHub Repository: [link]
